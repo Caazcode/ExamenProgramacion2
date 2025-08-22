@@ -1,6 +1,6 @@
 package examenprogra2thomasycarlos;
 
-import com.toedter.calendar.JDateChooser;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -16,7 +16,7 @@ public class RentaMultimedia {
     }
 
     private static void mostrarMenuPrincipal() {
-        JFrame frame = new JFrame("🎬 Sistema de Renta Multimedia");
+        JFrame frame = new JFrame("Sistema de Renta Multimedia");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(500, 400);
         frame.setLocationRelativeTo(null);
@@ -27,30 +27,82 @@ public class RentaMultimedia {
         panel.setBackground(new Color(33, 47, 60));
         panel.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
 
-        String[] opciones = {"➕ Agregar Ítem", "💰 Rentar", "⚙️ Submenú", "📋 Imprimir Todo", "❌ Salir"};
+        String[] opciones = {"Agregar Ítem", "Rentar", "Submenú", "Imprimir Todo", "Salir"};
 
         for (int i = 0; i < opciones.length; i++) {
-            JButton btn = new JButton(opciones[i]);
-            btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
-            btn.setBackground(new Color(41, 128, 185));
-            btn.setForeground(Color.WHITE);
-            int finalI = i;
-            btn.addActionListener(e -> {
-                frame.dispose(); // cerrar menú actual
-                switch (finalI) {
-                    case 0 -> agregarItem();
-                    case 1 -> rentarItem();
-                    case 2 -> ejecutarSubmenu();
-                    case 3 -> imprimirTodo();
-                    case 4 -> System.exit(0);
-                }
-            });
-            panel.add(btn);
+    JButton btn = new JButton(opciones[i]);
+    btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+    btn.setBackground(new Color(44, 62, 80));
+    btn.setForeground(Color.WHITE);
+    btn.setFocusPainted(false);
+    btn.setBorderPainted(false);
+    btn.setOpaque(true);
+    btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+    
+    btn.addMouseListener(new java.awt.event.MouseAdapter() {
+        public void mouseEntered(java.awt.event.MouseEvent evt) {
+            btn.setBackground(new Color(52, 152, 219)); 
         }
+
+        public void mouseExited(java.awt.event.MouseEvent evt) {
+            btn.setBackground(new Color(44, 62, 80));
+        }
+    });
+
+    int finalI = i;
+    btn.addActionListener(e -> {
+        frame.dispose();
+        switch (finalI) {
+            case 0 -> agregarItem();
+            case 1 -> rentarItem();
+            case 2 -> ejecutarSubmenu();
+            case 3 -> imprimirTodo();
+            case 4 -> System.exit(0);
+        }
+    });
+
+    panel.add(btn);
+}
 
         frame.add(panel);
         frame.setVisible(true);
     }
+    
+    private static Date pedirFechaManual() {
+    JTextField añoField = new JTextField(4);
+    JTextField mesField = new JTextField(2);
+    JTextField diaField = new JTextField(2);
+
+    JPanel panel = new JPanel(new GridLayout(3, 2, 10, 5));
+    panel.setBackground(Color.WHITE);
+    panel.add(new JLabel("Año (e.j. 2025):"));
+    panel.add(añoField);
+    panel.add(new JLabel("Mes (1-12):"));
+    panel.add(mesField);
+    panel.add(new JLabel("Día (1-31):"));
+    panel.add(diaField);
+
+    int result = JOptionPane.showConfirmDialog(null, panel, "Ingrese fecha de publicación",
+            JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+    if (result == JOptionPane.OK_OPTION) {
+        try {
+            int año = Integer.parseInt(añoField.getText().trim());
+            int mes = Integer.parseInt(mesField.getText().trim()) - 1; 
+            int dia = Integer.parseInt(diaField.getText().trim());
+
+            Calendar cal = Calendar.getInstance();
+            cal.setLenient(false);
+            cal.set(año, mes, dia);
+
+            return cal.getTime();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Fecha inválida. Intente de nuevo.");
+        }
+    }
+    return null;
+}
 
     private static void agregarItem() {
         String[] opciones = {"Película", "Videojuego"};
@@ -61,22 +113,18 @@ public class RentaMultimedia {
 
         String codigo = JOptionPane.showInputDialog("Ingrese código:");
         if (buscarItem(codigo) != null) {
-            JOptionPane.showMessageDialog(null, "❌ Código ya existe.");
+            JOptionPane.showMessageDialog(null, "Código ya existe.");
             return;
         }
+        
 
         String nombre = JOptionPane.showInputDialog("Ingrese nombre:");
 
-        // Fecha de publicación usando calendario visual
-        JPanel fechaPanel = new JPanel();
-        fechaPanel.add(new JLabel("Seleccione fecha de publicación:"));
-        JDateChooser dateChooser = new JDateChooser();
-        fechaPanel.add(dateChooser);
-        int result = JOptionPane.showConfirmDialog(null, fechaPanel, "Fecha de publicación", JOptionPane.OK_CANCEL_OPTION);
-        if (result != JOptionPane.OK_OPTION || dateChooser.getDate() == null) return;
-        Date fechaPublicacion = dateChooser.getDate();
+    
+        Date fechaPublicacion = pedirFechaManual();
+if (fechaPublicacion == null) return;
 
-        // Imagen
+        
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Seleccionar imagen");
         chooser.setFileFilter(new FileNameExtensionFilter("Imágenes (.jpg, .png)", "jpg", "jpeg", "png"));
@@ -86,16 +134,16 @@ public class RentaMultimedia {
         Image img = new ImageIcon(chooser.getSelectedFile().getAbsolutePath()).getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
         ImageIcon icono = new ImageIcon(img);
 
-        if (tipo == 0) { // Movie
+        if (tipo == 0) { 
             double precio = Double.parseDouble(JOptionPane.showInputDialog("Ingrese precio base:"));
             Movie movie = new Movie(codigo, nombre, precio);
             movie.setImagen(icono);
             movie.setFechaPublicacion(fechaPublicacion);
             items.add(movie);
-        } else {
+        } else { 
             Game game = new Game(codigo, nombre, 20);
             game.setImagen(icono);
-            game.setFechaPublicacion(fechaPublicacion);
+           
             items.add(game);
         }
 
@@ -108,7 +156,7 @@ public class RentaMultimedia {
         RentItem item = buscarItem(codigo);
 
         if (item == null) {
-            JOptionPane.showMessageDialog(null, "❌ Ítem no encontrado.");
+            JOptionPane.showMessageDialog(null, "Ítem no encontrado.");
             mostrarMenuPrincipal();
             return;
         }
@@ -116,7 +164,7 @@ public class RentaMultimedia {
         int dias = Integer.parseInt(JOptionPane.showInputDialog("Ingrese días de renta:"));
         double monto = item.pagoRenta(dias);
 
-        JOptionPane.showMessageDialog(null, item.toString() + "\n💸 Total a pagar: Lps. " + monto,
+        JOptionPane.showMessageDialog(null, item.toString() + "\nTotal a pagar: Lps. " + monto,
                 "Renta", JOptionPane.INFORMATION_MESSAGE, item.getImagen());
 
         mostrarMenuPrincipal();
@@ -129,14 +177,14 @@ public class RentaMultimedia {
         if (item instanceof MenuActions) {
             ((MenuActions) item).submenu();
         } else {
-            JOptionPane.showMessageDialog(null, "⚠️ Este ítem no tiene submenú.");
+            JOptionPane.showMessageDialog(null, "Este ítem no tiene submenú.");
         }
 
         mostrarMenuPrincipal();
     }
 
     private static void imprimirTodo() {
-        JFrame frame = new JFrame("🎥 Ítems Registrados");
+        JFrame frame = new JFrame("Ítems Registrados");
         frame.setSize(850, 600);
         frame.setLocationRelativeTo(null);
 

@@ -17,13 +17,13 @@ public class Game extends RentItem implements MenuActions {
     private ArrayList<String> especificaciones;
 
     public Game(String codigo, String nombre, double precioBase) {
-        super(codigo, nombre, precioBase); // precioBase no se usa directamente, es fijo: 20
+        super(codigo, nombre, precioBase); 
         this.fechaPublicacion = Calendar.getInstance();
         this.especificaciones = new ArrayList<>();
     }
 
     public void setFechaPublicacion(int year, int mes, int dia) {
-        this.fechaPublicacion.set(year, mes - 1, dia); // mes 0-indexado
+        this.fechaPublicacion.set(year, mes - 1, dia); 
     }
 
     public Calendar getFechaPublicacion() {
@@ -65,7 +65,7 @@ public class Game extends RentItem implements MenuActions {
     public void ejecutarOpcion(int opcion) {
         switch (opcion) {
             case 1 -> {
-                // Este método se usará desde GUI, así que solo se define el comportamiento esperado
+               
                 System.out.println("Actualizar fecha de publicación...");
             }
             case 2 -> {
