@@ -6,6 +6,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Date;
+import com.toedter.calendar.JDateChooser;
 
 public class RentaMultimedia {
 
@@ -30,79 +31,66 @@ public class RentaMultimedia {
         String[] opciones = {"Agregar Ítem", "Rentar", "Submenú", "Imprimir Todo", "Salir"};
 
         for (int i = 0; i < opciones.length; i++) {
-    JButton btn = new JButton(opciones[i]);
-    btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
-    btn.setBackground(new Color(44, 62, 80));
-    btn.setForeground(Color.WHITE);
-    btn.setFocusPainted(false);
-    btn.setBorderPainted(false);
-    btn.setOpaque(true);
-    btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-    
-    btn.addMouseListener(new java.awt.event.MouseAdapter() {
-        public void mouseEntered(java.awt.event.MouseEvent evt) {
-            btn.setBackground(new Color(52, 152, 219)); 
-        }
-
-        public void mouseExited(java.awt.event.MouseEvent evt) {
+            JButton btn = new JButton(opciones[i]);
+            btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
             btn.setBackground(new Color(44, 62, 80));
-        }
-    });
+            btn.setForeground(Color.WHITE);
+            btn.setFocusPainted(false);
+            btn.setBorderPainted(false);
+            btn.setOpaque(true);
+            btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-    int finalI = i;
-    btn.addActionListener(e -> {
-        frame.dispose();
-        switch (finalI) {
-            case 0 -> agregarItem();
-            case 1 -> rentarItem();
-            case 2 -> ejecutarSubmenu();
-            case 3 -> imprimirTodo();
-            case 4 -> System.exit(0);
-        }
-    });
+            btn.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    btn.setBackground(new Color(52, 152, 219));
+                }
 
-    panel.add(btn);
-}
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    btn.setBackground(new Color(44, 62, 80));
+                }
+            });
+
+            int finalI = i;
+            btn.addActionListener(e -> {
+                frame.dispose();
+                switch (finalI) {
+                    case 0 -> agregarItem();
+                    case 1 -> rentarItem();
+                    case 2 -> ejecutarSubmenu();
+                    case 3 -> imprimirTodo();
+                    case 4 -> System.exit(0);
+                }
+            });
+
+            panel.add(btn);
+        }
 
         frame.add(panel);
         frame.setVisible(true);
     }
-    
-    private static Date pedirFechaManual() {
-    JTextField añoField = new JTextField(4);
-    JTextField mesField = new JTextField(2);
-    JTextField diaField = new JTextField(2);
 
-    JPanel panel = new JPanel(new GridLayout(3, 2, 10, 5));
-    panel.setBackground(Color.WHITE);
-    panel.add(new JLabel("Año (e.j. 2025):"));
-    panel.add(añoField);
-    panel.add(new JLabel("Mes (1-12):"));
-    panel.add(mesField);
-    panel.add(new JLabel("Día (1-31):"));
-    panel.add(diaField);
+    private static Date pedirFechaConCalendario() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-    int result = JOptionPane.showConfirmDialog(null, panel, "Ingrese fecha de publicación",
-            JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        JLabel label = new JLabel("Seleccione la fecha de publicación:");
+        label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        JDateChooser dateChooser = new JDateChooser();
+        dateChooser.setDateFormatString("dd/MM/yyyy");
+        dateChooser.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
-    if (result == JOptionPane.OK_OPTION) {
-        try {
-            int año = Integer.parseInt(añoField.getText().trim());
-            int mes = Integer.parseInt(mesField.getText().trim()) - 1; 
-            int dia = Integer.parseInt(diaField.getText().trim());
+        panel.add(label, BorderLayout.NORTH);
+        panel.add(dateChooser, BorderLayout.CENTER);
 
-            Calendar cal = Calendar.getInstance();
-            cal.setLenient(false);
-            cal.set(año, mes, dia);
+        int result = JOptionPane.showConfirmDialog(null, panel, "Fecha de Publicación",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
-            return cal.getTime();
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "Fecha inválida. Intente de nuevo.");
+        if (result == JOptionPane.OK_OPTION) {
+            return dateChooser.getDate();
         }
+        return null;
     }
-    return null;
-}
 
     private static void agregarItem() {
         String[] opciones = {"Película", "Videojuego"};
@@ -116,15 +104,13 @@ public class RentaMultimedia {
             JOptionPane.showMessageDialog(null, "Código ya existe.");
             return;
         }
-        
 
         String nombre = JOptionPane.showInputDialog("Ingrese nombre:");
 
-    
-        Date fechaPublicacion = pedirFechaManual();
-if (fechaPublicacion == null) return;
+        // Fecha con calendario estilo Windows
+        Date fechaPublicacion = pedirFechaConCalendario();
+        if (fechaPublicacion == null) return;
 
-        
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Seleccionar imagen");
         chooser.setFileFilter(new FileNameExtensionFilter("Imágenes (.jpg, .png)", "jpg", "jpeg", "png"));
@@ -134,16 +120,15 @@ if (fechaPublicacion == null) return;
         Image img = new ImageIcon(chooser.getSelectedFile().getAbsolutePath()).getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
         ImageIcon icono = new ImageIcon(img);
 
-        if (tipo == 0) { 
+        if (tipo == 0) {
             double precio = Double.parseDouble(JOptionPane.showInputDialog("Ingrese precio base:"));
             Movie movie = new Movie(codigo, nombre, precio);
             movie.setImagen(icono);
             movie.setFechaPublicacion(fechaPublicacion);
             items.add(movie);
-        } else { 
+        } else {
             Game game = new Game(codigo, nombre, 20);
             game.setImagen(icono);
-           
             items.add(game);
         }
 
@@ -227,4 +212,3 @@ if (fechaPublicacion == null) return;
         return null;
     }
 }
-
