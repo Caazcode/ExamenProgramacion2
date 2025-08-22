@@ -1,5 +1,6 @@
 package examenprogra2thomasycarlos;
 
+import java.util.Calendar;
 import java.util.Date;
 
 public class Movie extends RentItem {
@@ -22,8 +23,8 @@ public class Movie extends RentItem {
         if (fechaPublicacion == null) return "SIN FECHA";
 
         long ahora = new Date().getTime();
-        long pub = fechaPublicacion.getTime();
-        long diferenciaDias = (ahora - pub) / (1000L * 60 * 60 * 24);
+        long publicada = fechaPublicacion.getTime();
+        long diferenciaDias = (ahora - publicada) / (1000L * 60 * 60 * 24);
 
         return diferenciaDias <= 90 ? "ESTRENO" : "NORMAL";
     }
