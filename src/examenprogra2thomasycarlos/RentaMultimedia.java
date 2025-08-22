@@ -5,7 +5,6 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 public class RentaMultimedia {
